@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Price Tracker</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.11.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, #515dbb, #bb6464);
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background: linear-gradient(to right, #5a67ce, #c56a6a);
+            color: white;
+            text-align: center;
+            padding: 30px 30px;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .last-updated {
+            position: absolute;
+            right: 20px;
+            top: 30px;
+            color: #e0e0e0;
+            font-size: 0.9em;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-top: 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        h2 {
+        color: #fff;
+        font-size: 1em;
+        text-align: center;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        }
+        main {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.28);
+            color: black;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+        .buttons-container {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .toggle-button, #refreshButton {
+            cursor: pointer;
+            display: inline-block;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            user-select: none;
+            color: #ffffff;
+            background-color: transparent;
+            transition: all 0.3s ease;
+            margin: 0 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+        }
+        .toggle-button.active {
+            background-color: rgba(249, 110, 91, 0.36);
+            color: white;
+        }
+        #refreshButton {
+            background-color: transparent;
+            position: absolute;
+            right: 20px;
+            top: 100px;
+            border: 1px solid white;
+            padding: 5px 15px;
+            color:white;
+        }
+        #refreshButton:hover {
+        background-color: rgba(255, 255, 255, 0.1); /* Slight white tint on hover */
+        }
+        #refreshButton.disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        table {
+            margin-top: 20px;
+        }
+        @media (max-width: 768px) {
+            header, main, .buttons-container, #refreshButton {
+                text-align: center;
+            }
+            .last-updated {
+                position: static;
+                display: block;
+                margin-top: 20px;
+            }
+            #refreshButton {
+                position: static;
+                display: block;
+                margin: 20px auto;
+            }
+        }
+        div.dataTables_wrapper  div.dataTables_filter {
+            width: 100%;
+            float: right;
+            background-color: transparent;
+            color: white;
+            text-align: right;
+        }
+        div.dataTables_wrapper  div.dataTables_filter input {
+            width: 100%;
+            float: right;
+            background-color: transparent;
+            color: white;
+            text-align: left;
+        }
+        .dataTables_filter input:focus {
+        outline: none;
+        box-shadow: none;
+    }
+        #pricesTable td {
+    color: white;
+}
+        #pricesTable thead th {
+    color: white;
+}
+        .tooltip-custom {
+            position: relative;
+            display: flex;
+            cursor: pointer;
+        }
+
+        .tooltip-custom .tooltip-text {
+            visibility: hidden;
+            width: fit-content;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            text-align: left;
+            border-radius: 6px;
+            padding: 5px 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+
+        .tooltip-custom:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Hypixel Bazaar Tracker</h1>
+        <h2>an fgm project</h2>
+        <div class="last-updated">
+            Last Updated: {{ last_updated | datetime_format }}
+        </div>
+    </header>
+    <main>
+        <div class="buttons-container">
+            <button class="toggle-button" data-column="1">Buy Price</button>
+            <button class="toggle-button" data-column="2">Sell Price</button>
+            <button class="toggle-button" data-column="3">Price Difference</button>
+            <button class="toggle-button" data-column="4">Weekly Buy Volume</button>
+            <button class="toggle-button" data-column="5">Weekly Sell Volume</button>
+            <button id="refreshButton">Refresh Data</button>
+        </div>
+        <table id="pricesTable" class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>First Buy Price</th>
+                    <th>First Sell Price</th>
+                    <th>Price Difference</th>
+                    <th>Weekly Buy Volume</th>
+                    <th>Weekly Sell Volume</th>
+                    <th>Points</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item_id, product in prices_data.items() %}
+                {% if item_id in item_ids %}
+                <tr>
+                    <td class="tooltip-custom">{{ product.get('product_id', 'N/A') }}
+                        <span class="tooltip-text">
+                            Average Sell Price: {{ product.quick_status.sellPrice | format_number }}<br>
+                            Average Buy Price: {{ product.quick_status.buyPrice | format_number }}<br>
+                        </span>
+                    <td>{{ product.first_buy_price | format_number }}</td>
+                    <td>{{ product.first_sell_price | format_number }}</td>
+                    <td>{{ (product.first_buy_price - product.first_sell_price) | format_number }}</td>
+                    <td>{{ product.quick_status.buyMovingWeek | format_number(0) }}</td> <!-- No decimals -->
+                    <td>{{ product.quick_status.sellMovingWeek | format_number(0) }}</td> <!-- No decimals -->
+                    <td>{{ product.get('points', 0) | format_number }}</td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.4/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Initialize the DataTable
+            var table = $('#pricesTable').DataTable({
+                "paging": false,
+                "lengthChange": false,
+                "order": [[6, "desc"]],
+                // Add any other DataTable configurations you might have
+            });
+
+            // Toggle visibility of columns
+            $('.toggle-button').on('click', function () {
+                var column = table.column($(this).attr('data-column'));
+                column.visible(!column.visible());
+                $(this).toggleClass('active');
+            });
+
+            // Refresh button functionality
+            $('#refreshButton').on('click', function () {
+                $(this).addClass('disabled');
+                $.get('/refresh_prices', function (data) {
+                    if (data.success) {
+                        $('.last-updated').text('Last Updated: ' + data.last_updated);
+                        table.clear();
+                        for (var item_id in data.prices_data) {
+                            if (data.prices_data.hasOwnProperty(item_id)) {
+                                var product = data.prices_data[item_id];
+                                table.row.add([
+                                    product.product_id || 'N/A',
+                                    formatNumber(product.first_buy_price),
+                                    formatNumber(product.first_sell_price),
+                                    formatNumber(product.first_buy_price - product.first_sell_price),
+                                    formatInteger(product.quick_status.buyMovingWeek),
+                                    formatInteger(product.quick_status.sellMovingWeek),
+                                    formatNumber(product.points)
+                                ]);
+                            }
+                        }
+                        table.draw();
+                    }
+                }).always(function () {
+                    setTimeout(function () {
+                        $('#refreshButton').removeClass('disabled');
+                    }, 5000);
+                });
+            });
+
+            // Change search input background color based on text input
+            table.on('search.dt', function () {
+                $('.dataTables_filter input').css('background-color', table.search() === '' ? 'transparent' : 'transparent');
+            });
+
+            // Number formatting functions
+            function formatNumber(value, decimals = 2) {
+                if (isNaN(value)) {
+                    return value;
+                }
+                return value.toFixed(decimals).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+            }
+
+            function formatInteger(value) {
+                return formatNumber(value, 0);
+            }
+        });
+    </script>
+
+</body>
+</html>
