@@ -1,0 +1,147 @@
+/* style.css content */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(to right, #515dbb, #bb6464);
+    margin: 0;
+    padding: 0;
+}
+header {
+    background: linear-gradient(to right, #5a67ce, #c56a6a);
+    color: white;
+    text-align: center;
+    padding: 30px 30px;
+    position: relative;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+.last-updated {
+    position: absolute;
+    right: 20px;
+    top: 30px;
+    color: #e0e0e0;
+    font-size: 0.9em;
+}
+h1 {
+    font-size: 2.5em;
+    margin-top: 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+h2 {
+    color: #fff;
+    font-size: 1em;
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+main {
+    max-width: 1400px;
+    margin: 30px auto;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.28);
+    color: black;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+}
+.buttons-container {
+    margin-bottom: 20px;
+    text-align: center;
+}
+.toggle-button, #refreshButton {
+    cursor: pointer;
+    display: inline-block;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    user-select: none;
+    color: #ffffff;
+    background-color: transparent;
+    transition: all 0.3s ease;
+    margin: 0 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+.toggle-button.active {
+    background-color: rgba(249, 110, 91, 0.36);
+    color: white;
+}
+#refreshButton {
+    background-color: transparent;
+    position: absolute;
+    right: 20px;
+    top: 100px;
+    border: 1px solid white;
+    padding: 5px 15px;
+    color: white;
+}
+#refreshButton:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+#refreshButton.disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+table {
+    margin-top: 20px;
+}
+@media (max-width: 768px) {
+    header, main, .buttons-container, #refreshButton {
+        text-align: center;
+    }
+    .last-updated {
+        position: static;
+        display: block;
+        margin-top: 20px;
+    }
+    #refreshButton {
+        position: static;
+        display: block;
+        margin: 20px auto;
+    }
+}
+div.dataTables_wrapper  div.dataTables_filter {
+    width: 100%;
+    float: right;
+    background-color: transparent;
+    color: white;
+    text-align: right;
+}
+div.dataTables_wrapper  div.dataTables_filter input {
+    width: 100%;
+    float: right;
+    background-color: transparent;
+    color: white;
+    text-align: left;
+}
+.dataTables_filter input:focus {
+    outline: none;
+    box-shadow: none;
+}
+#pricesTable td {
+    color: white;
+}
+#pricesTable thead th {
+    color: white;
+}
+.tooltip-custom {
+    position: relative;
+    display: flex;
+    cursor: pointer;
+}
+.tooltip-custom .tooltip-text {
+    visibility: hidden;
+    width: fit-content;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    text-align: left;
+    border-radius: 6px;
+    padding: 5px 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -60px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+.tooltip-custom:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
